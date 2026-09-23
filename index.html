@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f0f10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DOMSday">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>DOMSday</title>
+<style>
+:root{--bg:#0f0f10;--card:#19191c;--card2:#222226;--line:#33333a;--text:#f7f7f8;--muted:#a7a7b0;--red:#ef4444;--green:#22c55e;--accent:#f5f5f5}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+header{padding:18px 16px 10px;position:sticky;top:0;background:rgba(15,15,16,.94);backdrop-filter:blur(12px);z-index:10;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px}.brand img{width:42px;height:42px;border-radius:10px}.brand h1{font-size:21px;margin:0}.brand p{margin:2px 0 0;color:var(--muted);font-size:13px}
+main{max-width:900px;margin:auto;padding:14px 14px 90px}.row{display:flex;gap:8px;flex-wrap:wrap}.tabs{display:flex;gap:8px;overflow:auto;padding-bottom:4px}.btn,.tab,select,input{font:inherit}
+.btn,.tab{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:12px;padding:10px 13px;min-height:44px}.tab.active,.btn.active{background:var(--text);color:#111;border-color:var(--text)}
+select,input{background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px;min-height:44px;min-width:0;width:100%}
+.topline{display:grid;grid-template-columns:1fr 120px;gap:10px;align-items:end;margin-bottom:12px}.label{font-size:12px;color:var(--muted);margin-bottom:5px}
+.summary{display:flex;gap:18px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:12px 0;font-size:13px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:10px}.card.selected{border-color:#777}.head{display:flex;justify-content:space-between;gap:8px}.title{font-weight:700}.meta{color:var(--muted);font-size:12px;margin-top:3px}.start{text-align:right;font-size:12px;color:var(--muted)}.start strong{display:block;color:var(--text);font-size:14px;margin-top:2px}
+.fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:10px}.field span{display:block;color:var(--muted);font-size:11px;margin-bottom:4px}.status{font-size:12px;margin-top:8px;min-height:18px}.good{color:var(--green);font-weight:700}.suggest{font-size:13px;font-weight:700;margin-top:4px}
+.map{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;position:sticky;top:92px;height:max-content}.map h3{font-size:14px;margin:0}.selectedName{font-size:12px;color:var(--muted);margin:4px 0 8px}.people{display:grid;grid-template-columns:1fr 1fr;gap:6px}.personLabel{text-align:center;color:var(--muted);font-size:11px;margin-bottom:2px}svg{width:100%;height:auto}.grey{fill:#777}.muscle{fill:var(--red);display:none}.muscle.on{display:block}
+.new{font-size:10px;border:1px solid #555;padding:2px 5px;border-radius:999px;color:#bbb;margin-left:5px}.checkrow{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:12px;color:var(--muted)}.checkrow input{width:20px;height:20px;min-height:0}
+.foot{color:var(--muted);font-size:12px;margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:14px}.hide{display:none!important}
+@media(max-width:680px){.layout{grid-template-columns:1fr}.map{position:relative;top:auto}.map{order:-1}.people{max-width:320px;margin:auto}.fields{grid-template-columns:1fr 1fr 1fr}.topline{grid-template-columns:1fr 108px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><img src="icon-192.png" alt=""><div><h1>DOMSday</h1><p>Track. Lift. Regret it tomorrow.</p></div></div></header>
+<main>
+<div class="topline">
+  <div><div class="label">View</div><div class="row"><button class="btn active" id="modeMuscle">Muscle groups</button><button class="btn" id="modePpl">Push / Pull / Legs</button></div></div>
+  <label><div class="label">Week</div><select id="week"></select></label>
+</div>
+<div class="tabs" id="muscleTabs"></div><div class="tabs hide" id="pplTabs"></div>
+<div class="summary" id="summary"></div>
+<div class="layout">
+  <section id="list"></section>
+  <aside class="map">
+    <h3>Muscle map</h3><div class="selectedName" id="selectedName">Tap an exercise</div>
+    <div class="people">
+      <div><div class="personLabel">Front</div>
+      <svg viewBox="0 0 120 260" aria-label="Front muscle map">
+        <g class="grey"><circle cx="60" cy="22" r="14"/><rect x="49" y="36" width="22" height="22" rx="8"/><rect x="38" y="58" width="44" height="56" rx="16"/><rect x="20" y="58" width="16" height="70" rx="8"/><rect x="84" y="58" width="16" height="70" rx="8"/><rect x="42" y="114" width="16" height="48" rx="8"/><rect x="62" y="114" width="16" height="48" rx="8"/><rect x="42" y="162" width="14" height="74" rx="8"/><rect x="64" y="162" width="14" height="74" rx="8"/></g>
+        <g><ellipse id="f-shoulders-l" class="muscle" cx="42" cy="63" rx="10" ry="10"/><ellipse id="f-shoulders-r" class="muscle" cx="78" cy="63" rx="10" ry="10"/><ellipse id="f-biceps-l" class="muscle" cx="28" cy="82" rx="8" ry="14"/><ellipse id="f-biceps-r" class="muscle" cx="92" cy="82" rx="8" ry="14"/><ellipse id="f-forearms-l" class="muscle" cx="28" cy="112" rx="7" ry="13"/><ellipse id="f-forearms-r" class="muscle" cx="92" cy="112" rx="7" ry="13"/><path id="f-chest" class="muscle" d="M42 70 C48 64,54 64,60 74 C66 64,72 64,78 70 L78 92 C71 98,49 98,42 92 Z"/><rect id="f-abs" class="muscle" x="48" y="94" width="24" height="34" rx="8"/><rect id="f-oblique-l" class="muscle" x="40" y="94" width="8" height="34" rx="4"/><rect id="f-oblique-r" class="muscle" x="72" y="94" width="8" height="34" rx="4"/><ellipse id="f-quads-l" class="muscle" cx="50" cy="139" rx="7" ry="18"/><ellipse id="f-quads-r" class="muscle" cx="70" cy="139" rx="7" ry="18"/></g>
+      </svg></div>
+      <div><div class="personLabel">Back</div>
+      <svg viewBox="0 0 120 260" aria-label="Back muscle map">
+        <g class="grey"><circle cx="60" cy="22" r="14"/><rect x="49" y="36" width="22" height="22" rx="8"/><rect x="38" y="58" width="44" height="56" rx="16"/><rect x="20" y="58" width="16" height="70" rx="8"/><rect x="84" y="58" width="16" height="70" rx="8"/><rect x="42" y="114" width="16" height="48" rx="8"/><rect x="62" y="114" width="16" height="48" rx="8"/><rect x="42" y="162" width="14" height="74" rx="8"/><rect x="64" y="162" width="14" height="74" rx="8"/></g>
+        <g><ellipse id="b-shoulders-l" class="muscle" cx="42" cy="63" rx="10" ry="10"/><ellipse id="b-shoulders-r" class="muscle" cx="78" cy="63" rx="10" ry="10"/><ellipse id="b-triceps-l" class="muscle" cx="28" cy="84" rx="8" ry="14"/><ellipse id="b-triceps-r" class="muscle" cx="92" cy="84" rx="8" ry="14"/><path id="b-upperback" class="muscle" d="M45 70 Q60 58 75 70 L72 92 Q60 102 48 92 Z"/><path id="b-lats-l" class="muscle" d="M43 76 Q35 88 40 110 L52 110 L55 80 Z"/><path id="b-lats-r" class="muscle" d="M77 76 Q85 88 80 110 L68 110 L65 80 Z"/><rect id="b-lowerback" class="muscle" x="49" y="96" width="22" height="24" rx="8"/><ellipse id="b-reardelts-l" class="muscle" cx="42" cy="72" rx="8" ry="8"/><ellipse id="b-reardelts-r" class="muscle" cx="78" cy="72" rx="8" ry="8"/><ellipse id="b-glutes-l" class="muscle" cx="52" cy="129" rx="8" ry="10"/><ellipse id="b-glutes-r" class="muscle" cx="68" cy="129" rx="8" ry="10"/><ellipse id="b-hams-l" class="muscle" cx="50" cy="148" rx="7" ry="16"/><ellipse id="b-hams-r" class="muscle" cx="70" cy="148" rx="7" ry="16"/></g>
+      </svg></div>
+    </div>
+  </aside>
+</div>
+<div class="foot"><strong>Progression:</strong> when you hit the top of the rep range with clean form and roughly 2 reps left, use the suggested increase next time.</div>
+</main>
+<script>
+const exercises=[
+['Back','Lat Pulldown','Pull',55,'10–12',0,['b-lats-l','b-lats-r','b-upperback']],
+['Back','Cable Lat Pulldown','Pull',45,'10–12',0,['b-lats-l','b-lats-r','b-upperback']],
+['Back','Low Row','Pull',40,'8–10',0,['b-upperback','b-lats-l','b-lats-r','b-reardelts-l','b-reardelts-r']],
+['Back','Dumbbell Row','Pull',20,'8–10',0,['b-lats-l','b-lats-r','b-upperback']],
+['Back','Rear Delt Row','Pull',27.5,'10–12',0,['b-reardelts-l','b-reardelts-r','b-upperback']],
+['Back','Seated Row','Pull',45,'8–10',0,['b-upperback','b-lats-l','b-lats-r']],
+['Back','Straight-Arm Cable Pulldown','Pull',20,'10–12',1,['b-lats-l','b-lats-r']],
+['Biceps','Dumbbell Curl','Pull',10,'8–12',0,['f-biceps-l','f-biceps-r','f-forearms-l','f-forearms-r']],
+['Biceps','Preacher Curl','Pull',15,'8–10',0,['f-biceps-l','f-biceps-r']],
+['Biceps','Hammer Curl','Pull',12,'8–10',0,['f-biceps-l','f-biceps-r','f-forearms-l','f-forearms-r']],
+['Biceps','Incline Dumbbell Curl','Pull',8,'10–12',1,['f-biceps-l','f-biceps-r']],
+['Triceps','Dumbbell Tricep Exercise','Push',10,'8–10',0,['b-triceps-l','b-triceps-r']],
+['Triceps','Overhead Dumbbell Extension','Push',18,'8–10',0,['b-triceps-l','b-triceps-r']],
+['Triceps','Tricep Extension','Push',40,'10–12',0,['b-triceps-l','b-triceps-r']],
+['Triceps','Cable Tricep Exercise','Push',17.5,'8–10',0,['b-triceps-l','b-triceps-r']],
+['Triceps','Rope Pushdown','Push',20,'10–12',1,['b-triceps-l','b-triceps-r']],
+['Shoulders','Shoulder Press','Push',40,'8–10',0,['f-shoulders-l','f-shoulders-r','b-triceps-l','b-triceps-r']],
+['Shoulders','Lateral Raises','Push',6,'10–12',0,['f-shoulders-l','f-shoulders-r']],
+['Shoulders','Dumbbell Shoulder Press','Push',14,'8–10',0,['f-shoulders-l','f-shoulders-r','b-triceps-l','b-triceps-r']],
+['Shoulders','Reverse Pec Deck / Rear Delt Fly','Pull',25,'10–15',1,['b-reardelts-l','b-reardelts-r','b-upperback']],
+['Chest','Chest Press','Push',45,'8–10',0,['f-chest','f-shoulders-l','f-shoulders-r','b-triceps-l','b-triceps-r']],
+['Chest','Dumbbell Chest Press','Push',16,'8–10',0,['f-chest','f-shoulders-l','f-shoulders-r']],
+['Chest','Bench Press','Push',32.5,'8–10',0,['f-chest','f-shoulders-l','f-shoulders-r','b-triceps-l','b-triceps-r']],
+['Chest','Chest Fly','Push',32.5,'10–12',0,['f-chest']],
+['Chest','Incline Dumbbell Press','Push',14,'8–10',1,['f-chest','f-shoulders-l','f-shoulders-r']],
+['Abs','Ab Crunch Machine','Push',35,'10–12',0,['f-abs']],
+['Abs','Russian Twists','Pull',10,'20',0,['f-abs','f-oblique-l','f-oblique-r']],
+['Abs','Hanging Leg Raises','Pull',null,'8–10',0,['f-abs','f-oblique-l','f-oblique-r']],
+['Abs','Cable Woodchop','Pull',12.5,'10–12 each side',1,['f-oblique-l','f-oblique-r']],
+['Abs','Plank','Push',null,'30–45 sec',1,['f-abs','f-oblique-l','f-oblique-r','b-lowerback']],
+['Legs','Goblet Squat','Legs',18,'8–10',1,['f-quads-l','f-quads-r','b-glutes-l','b-glutes-r']],
+['Legs','Romanian Deadlift','Legs',30,'8–10',1,['b-hams-l','b-hams-r','b-glutes-l','b-glutes-r','b-lowerback']],
+['Legs','Leg Press','Legs',60,'10–12',1,['f-quads-l','f-quads-r','b-glutes-l','b-glutes-r']]
+].map((x,i)=>({id:i,g:x[0],n:x[1],split:x[2],base:x[3],target:x[4],added:!!x[5],muscles:x[6]}));
+let state=JSON.parse(localStorage.getItem('domsdayState')||'{}');
+state.logs=state.logs||{}; state.week=state.week||1; state.mode=state.mode||'muscle'; state.filter=state.filter||'Back'; state.selected=state.selected??null;
+const save=()=>localStorage.setItem('domsdayState',JSON.stringify(state));
+const weekSel=document.getElementById('week'); for(let i=1;i<=52;i++){const o=document.createElement('option');o.value=i;o.textContent='Week '+i;weekSel.appendChild(o)} weekSel.value=state.week;
+const groups=['Back','Biceps','Triceps','Shoulders','Chest','Abs']; const splits=['Push','Pull','Legs'];
+function tabs(el,vals,type){el.innerHTML='';vals.forEach(v=>{const b=document.createElement('button');b.className='tab';b.textContent=v;b.onclick=()=>{state.filter=v;state.selected=null;save();render()};b.dataset.v=v;el.appendChild(b)})}
+tabs(document.getElementById('muscleTabs'),groups,'muscle'); tabs(document.getElementById('pplTabs'),splits,'ppl');
+function entry(w,id){state.logs[w]=state.logs[w]||{};state.logs[w][id]=state.logs[w][id]||{weight:'',reps:'',sets:'',done:false};return state.logs[w][id]}
+function previous(id){for(let w=state.week-1;w>=1;w--){const e=state.logs[w]?.[id];if(e&&e.weight!=='')return {weight:Number(e.weight),reps:Number(e.reps||0)}}return null}
+function maxRep(t){const m=String(t).match(/(\d+)(?!.*\d)/);return m?+m[1]:null}
+function inc(w){if(w==null)return null;if(w<10)return 1;if(w<20)return 2;if(w<50)return 2.5;return 5}
+function visible(x){return state.mode==='muscle'?x.g===state.filter:x.split===state.filter}
+function map(x){document.querySelectorAll('.muscle').forEach(e=>e.classList.remove('on'));document.getElementById('selectedName').textContent=x?x.n:'Tap an exercise';if(x)x.muscles.forEach(id=>document.getElementById(id)?.classList.add('on'))}
+function render(){
+  weekSel.value=state.week;
+  document.getElementById('modeMuscle').classList.toggle('active',state.mode==='muscle');document.getElementById('modePpl').classList.toggle('active',state.mode==='ppl');
+  document.getElementById('muscleTabs').classList.toggle('hide',state.mode!=='muscle');document.getElementById('pplTabs').classList.toggle('hide',state.mode!=='ppl');
+  document.querySelectorAll('#muscleTabs .tab,#pplTabs .tab').forEach(b=>b.classList.toggle('active',b.dataset.v===state.filter));
+  const arr=exercises.filter(visible); if(state.selected==null||!arr.some(x=>x.id===state.selected))state.selected=arr[0]?.id??null;
+  let done=0,up=0;arr.forEach(x=>{const e=entry(state.week,x.id),p=previous(x.id);if(e.done)done++;if(e.weight!==''&&p&&+e.weight>p.weight)up++});
+  document.getElementById('summary').innerHTML=`<span><strong>${done}/${arr.length}</strong> complete</span><span><strong>${up}</strong> progressed</span><span>Week ${state.week}</span>`;
+  const list=document.getElementById('list');list.innerHTML='';
+  arr.forEach(x=>{
+    const e=entry(state.week,x.id),p=previous(x.id),ref=p?p.weight:x.base,beat=p&&e.weight!==''&&+e.weight>p.weight;
+    const top=maxRep(x.target),w=e.weight!==''?+e.weight:ref,reps=+e.reps||0;
+    const sugg=x.base==null?'Add reps/time before load':(top&&reps>=top?`Next: ${w+inc(w)}kg`:`Next: stay at ${w}kg`);
+    const c=document.createElement('div');c.className='card'+(state.selected===x.id?' selected':'');
+    c.innerHTML=`<div class="head"><div><div class="title">${x.n}${x.added?'<span class="new">Added</span>':''}${beat?'<span class="good"> ✓</span>':''}</div><div class="meta">${x.g} · ${x.split} · target ${x.target}</div></div><div class="start">${p?'Last logged':'Starting point'}<strong>${ref==null?'Bodyweight':ref+'kg'}</strong></div></div><div class="fields"><label class="field"><span>Weight</span><input data-k="weight" type="number" inputmode="decimal" step=".5" value="${e.weight}" placeholder="kg"></label><label class="field"><span>Reps</span><input data-k="reps" type="number" inputmode="numeric" value="${e.reps}" placeholder="reps"></label><label class="field"><span>Sets</span><input data-k="sets" type="number" inputmode="numeric" value="${e.sets}" placeholder="sets"></label></div><div class="status ${beat?'good':''}">${beat?'✓ '+(+e.weight-p.weight)+'kg up from last log':''}</div><div class="suggest">${sugg}</div><label class="checkrow"><input type="checkbox" ${e.done?'checked':''}> Completed this week</label>`;
+    c.onclick=ev=>{if(ev.target.closest('input,label'))return;state.selected=x.id;save();render()};
+    c.querySelector('input[type=checkbox]').onchange=ev=>{e.done=ev.target.checked;save();render()};
+    c.querySelectorAll('input[data-k]').forEach(inp=>inp.onchange=()=>{e[inp.dataset.k]=inp.value;save();render()});
+    list.appendChild(c)
+  }); map(exercises.find(x=>x.id===state.selected));save()
+}
+weekSel.onchange=()=>{state.week=+weekSel.value;save();render()};
+document.getElementById('modeMuscle').onclick=()=>{state.mode='muscle';state.filter='Back';state.selected=null;save();render()};
+document.getElementById('modePpl').onclick=()=>{state.mode='ppl';state.filter='Push';state.selected=null;save();render()};
+render();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+</script>
+</body></html>
