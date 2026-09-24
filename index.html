@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0a0a0a" />
+<title>DOMSday Alpha 0.1</title>
+<style>
+:root{
+  --bg:#080808;
+  --panel:#111214;
+  --panel2:#17181b;
+  --line:#26282c;
+  --text:#f4f4f4;
+  --muted:#96999f;
+  --red:#ff3b30;
+  --red2:#d82720;
+  --green:#65d58a;
+  --amber:#f6be55;
+  --shadow:0 18px 50px rgba(0,0,0,.35);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 30% -10%,#1b1b1d 0,#080808 38%,#050505 100%);color:var(--text);min-height:100vh}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.shell{min-height:100vh;padding-bottom:90px}
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:18px 18px 12px;background:linear-gradient(180deg,rgba(8,8,8,.98),rgba(8,8,8,.88),rgba(8,8,8,0));backdrop-filter:blur(14px)}
+.brand{font-size:29px;font-weight:900;letter-spacing:-1.4px}.brand .day{color:var(--red)}
+.version{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:5px 8px}
+.content{max-width:1100px;margin:0 auto;padding:6px 14px 24px}
+.hero{background:linear-gradient(145deg,#191a1d,#101113);border:1px solid var(--line);border-radius:24px;padding:20px;box-shadow:var(--shadow);overflow:hidden;position:relative}
+.hero:after{content:"";position:absolute;right:-70px;top:-80px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,59,48,.22),rgba(255,59,48,0) 70%);pointer-events:none}
+.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:11px;color:var(--muted);font-weight:700}
+h1,h2,h3,p{margin-top:0}.hero h1{font-size:32px;line-height:1.02;margin:8px 0 8px;letter-spacing:-1.1px}.hero p{color:var(--muted);line-height:1.45;margin-bottom:18px}
+.primary{border:0;border-radius:14px;background:var(--red);color:white;font-weight:800;padding:13px 16px;box-shadow:0 10px 22px rgba(255,59,48,.17)}
+.secondary{border:1px solid var(--line);border-radius:14px;background:#16171a;color:white;font-weight:750;padding:12px 14px}
+.ghost{border:0;background:transparent;color:var(--muted);padding:8px;font-weight:700}
+.grid{display:grid;gap:14px}.two{grid-template-columns:repeat(2,minmax(0,1fr))}.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.card{background:linear-gradient(145deg,#151619,#0f1012);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 6px;font-size:16px}.muted{color:var(--muted)}.small{font-size:12px}.metric{font-size:27px;font-weight:900;letter-spacing:-1px}.metric-sub{font-size:12px;color:var(--muted)}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin:24px 2px 10px}.section-title h2{font-size:18px;margin:0}.section-title span{color:var(--muted);font-size:12px}
+.today-row{display:flex;justify-content:space-between;gap:12px;align-items:center}.today-icon{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:#1e2024;border:1px solid var(--line);font-size:20px}
+.week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.day-pill{padding:11px 6px;border-radius:15px;background:#121316;border:1px solid var(--line);text-align:center}.day-pill.active{border-color:rgba(255,59,48,.55);box-shadow:inset 0 0 0 1px rgba(255,59,48,.12)}.day-pill .d{font-size:10px;color:var(--muted)}.day-pill .dot{width:6px;height:6px;border-radius:50%;background:#3b3d42;margin:7px auto 0}.day-pill.done .dot{background:var(--green)}.day-pill.planned .dot{background:var(--red)}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(6,1fr);gap:2px;padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:rgba(8,8,8,.94);backdrop-filter:blur(18px);border-top:1px solid var(--line)}
+.nav button{border:0;background:transparent;color:#787b80;padding:7px 2px 5px;border-radius:12px;font-size:10px;font-weight:700}.nav button.active{color:white;background:#17181b}.nav .ico{font-size:19px;display:block;margin-bottom:3px}
+.calendar{display:grid;gap:10px}.cal-row{display:grid;grid-template-columns:52px 1fr auto;gap:10px;align-items:center;background:#111214;border:1px solid var(--line);border-radius:18px;padding:11px}.cal-day{font-weight:900;font-size:13px}.cal-type{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}.cal-title{font-weight:800;font-size:14px}.cal-detail{color:var(--muted);font-size:12px;margin-top:3px}.cal-actions{display:flex;gap:5px}.mini{border:1px solid var(--line);background:#17181b;color:#d9d9d9;border-radius:10px;padding:7px 8px;font-size:11px}.done-tag{color:var(--green);font-size:11px;font-weight:800}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tab{white-space:nowrap;border:1px solid var(--line);background:#121316;color:#a9abb0;border-radius:999px;padding:9px 12px;font-size:12px;font-weight:800}.tab.active{background:var(--red);border-color:var(--red);color:white}
+.workout-layout{display:grid;grid-template-columns:290px 1fr;gap:14px}.body-card{position:sticky;top:80px;align-self:start}.body-wrap{display:grid;place-items:center;min-height:510px;background:radial-gradient(circle at 50% 35%,#24262a,#111214 60%,#0b0c0e);border-radius:18px;border:1px solid var(--line);overflow:hidden}.human{width:220px;max-width:82%;height:auto}.human .skin{fill:#7f8389;stroke:#b9bcc1;stroke-width:1;opacity:.72}.human .muscle{fill:transparent;transition:fill .2s,filter .2s}.human .muscle.hot{fill:rgba(255,59,48,.9);filter:drop-shadow(0 0 8px rgba(255,59,48,.85))}
+.exercise-list{display:grid;gap:10px}.exercise{background:#111214;border:1px solid var(--line);border-radius:18px;padding:14px}.exercise.selected{border-color:rgba(255,59,48,.52);box-shadow:inset 0 0 0 1px rgba(255,59,48,.1)}.exercise-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.exercise-name{font-weight:850;font-size:15px}.target{font-size:11px;color:var(--muted);margin-top:4px}.rec{font-size:11px;color:var(--green);margin-top:6px;font-weight:800}.set-grid{margin-top:11px;display:grid;grid-template-columns:34px 1fr 1fr 42px;gap:7px;align-items:center}.set-no{color:var(--muted);font-size:11px;text-align:center}.field{width:100%;border:1px solid #2a2c31;background:#17181b;color:white;border-radius:10px;padding:9px 8px;min-width:0}.check{width:38px;height:38px;border:1px solid #34363b;background:#18191c;color:#8c9096;border-radius:11px}.check.on{background:rgba(101,213,138,.12);color:var(--green);border-color:rgba(101,213,138,.45)}
+.progress-bar{height:9px;background:#202226;border-radius:999px;overflow:hidden}.progress-bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--red2),var(--red));border-radius:999px}
+.chat{display:flex;flex-direction:column;gap:10px;min-height:410px}.bubble{max-width:82%;padding:12px 13px;border-radius:16px;line-height:1.45;font-size:14px}.bubble.me{align-self:flex-end;background:var(--red);color:white;border-bottom-right-radius:5px}.bubble.coach{align-self:flex-start;background:#17181b;border:1px solid var(--line);color:#e9e9e9;border-bottom-left-radius:5px}.chat-input{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px}.chat-input textarea{resize:none;min-height:48px;border:1px solid var(--line);background:#121316;color:white;border-radius:14px;padding:12px}.note{background:rgba(246,190,85,.08);border:1px solid rgba(246,190,85,.28);color:#efd69a;border-radius:14px;padding:11px 12px;font-size:12px;line-height:1.4}
+.review-item{display:grid;grid-template-columns:1fr auto;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}.review-item:last-child{border-bottom:0}.score{font-size:24px;font-weight:900}.good{color:var(--green)}.warn{color:var(--amber)}
+.empty{color:var(--muted);padding:24px;text-align:center;border:1px dashed var(--line);border-radius:18px}
+@media(max-width:760px){.two,.three{grid-template-columns:1fr 1fr}.workout-layout{grid-template-columns:1fr}.body-card{position:relative;top:0}.body-wrap{min-height:330px}.human{width:150px}.content{padding-left:12px;padding-right:12px}.hero h1{font-size:29px}.nav{grid-template-columns:repeat(6,1fr)}.nav button{font-size:9px}}
+@media(max-width:480px){.two,.three{grid-template-columns:1fr}.week-strip{gap:5px}.day-pill{padding:10px 3px}.nav .ico{font-size:18px}.set-grid{grid-template-columns:30px 1fr 1fr 40px}}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const APP_VERSION = 'Alpha 0.1';
+
+const GROUPS = [
+  { id: 'chest', label: 'Chest' },
+  { id: 'back', label: 'Back' },
+  { id: 'shoulders', label: 'Shoulders' },
+  { id: 'biceps', label: 'Biceps' },
+  { id: 'triceps', label: 'Triceps' },
+  { id: 'abs', label: 'Abs' },
+  { id: 'legs', label: 'Legs' },
+  { id: 'glutes', label: 'Glutes' },
+];
+
+const EXERCISES = {
+  chest: [
+    { id:'chest-press', name:'Chest Press', kg:45, repMin:8, repMax:10, sets:3, muscle:'chest' },
+    { id:'db-chest-press', name:'Dumbbell Chest Press', kg:16, repMin:8, repMax:10, sets:3, muscle:'chest' },
+    { id:'bench-press', name:'Bench Press', kg:32.5, repMin:8, repMax:10, sets:3, muscle:'chest' },
+    { id:'chest-fly', name:'Chest Fly', kg:32.5, repMin:10, repMax:12, sets:3, muscle:'chest' },
+    { id:'incline-db-press', name:'Incline Dumbbell Press', kg:14, repMin:8, repMax:10, sets:3, muscle:'upper-chest' },
+  ],
+  back: [
+    { id:'lat-pulldown', name:'Lat Pulldown', kg:55, repMin:10, repMax:12, sets:3, muscle:'lats' },
+    { id:'cable-lat-pulldown', name:'Cable Lat Pulldown', kg:45, repMin:10, repMax:12, sets:3, muscle:'lats' },
+    { id:'low-row', name:'Low Row', kg:40, repMin:8, repMax:10, sets:3, muscle:'mid-back' },
+    { id:'db-row', name:'Dumbbell Row', kg:20, repMin:8, repMax:10, sets:3, muscle:'lats' },
+    { id:'rear-delt-row', name:'Rear Delt Row', kg:27.5, repMin:10, repMax:12, sets:3, muscle:'rear-delts' },
+    { id:'seated-row', name:'Seated Row', kg:45, repMin:8, repMax:10, sets:3, muscle:'mid-back' },
+    { id:'straight-arm-pulldown', name:'Straight-Arm Cable Pulldown', kg:20, repMin:10, repMax:12, sets:3, muscle:'lats' },
+  ],
+  shoulders: [
+    { id:'shoulder-press', name:'Shoulder Press', kg:40, repMin:8, repMax:10, sets:3, muscle:'shoulders' },
+    { id:'lateral-raises', name:'Lateral Raises', kg:6, repMin:10, repMax:12, sets:3, muscle:'side-delts' },
+    { id:'db-shoulder-press', name:'Dumbbell Shoulder Press', kg:14, repMin:8, repMax:10, sets:3, muscle:'shoulders' },
+    { id:'reverse-pec-deck', name:'Reverse Pec Deck / Rear Delt Fly', kg:25, repMin:10, repMax:15, sets:3, muscle:'rear-delts' },
+  ],
+  biceps: [
+    { id:'db-curl', name:'Dumbbell Curl', kg:10, repMin:8, repMax:12, sets:3, muscle:'biceps' },
+    { id:'preacher-curl', name:'Preacher Curl', kg:15, repMin:8, repMax:10, sets:3, muscle:'biceps' },
+    { id:'hammer-curl', name:'Hammer Curl', kg:12, repMin:8, repMax:10, sets:3, muscle:'biceps' },
+    { id:'incline-db-curl', name:'Incline Dumbbell Curl', kg:8, repMin:10, repMax:12, sets:3, muscle:'biceps' },
+  ],
+  triceps: [
+    { id:'db-tricep', name:'Dumbbell Tricep Exercise', kg:10, repMin:8, repMax:10, sets:3, muscle:'triceps' },
+    { id:'overhead-db-extension', name:'Overhead Dumbbell Extension', kg:18, repMin:8, repMax:10, sets:3, muscle:'triceps' },
+    { id:'tricep-extension', name:'Tricep Extension', kg:40, repMin:10, repMax:12, sets:3, muscle:'triceps' },
+    { id:'cable-tricep', name:'Cable Tricep Exercise', kg:17.5, repMin:8, repMax:10, sets:3, muscle:'triceps' },
+    { id:'rope-pushdown', name:'Rope Pushdown', kg:20, repMin:10, repMax:12, sets:3, muscle:'triceps' },
+  ],
+  abs: [
+    { id:'ab-crunch', name:'Ab Crunch Machine', kg:35, repMin:10, repMax:12, sets:3, muscle:'abs' },
+    { id:'russian-twists', name:'Russian Twists', kg:10, repMin:20, repMax:20, sets:3, muscle:'obliques' },
+    { id:'hanging-leg-raises', name:'Hanging Leg Raises', kg:0, repMin:8, repMax:10, sets:3, muscle:'abs', bodyweight:true },
+    { id:'cable-woodchop', name:'Cable Woodchop', kg:12.5, repMin:10, repMax:12, sets:3, muscle:'obliques' },
+    { id:'plank', name:'Plank', kg:0, repMin:30, repMax:45, sets:3, muscle:'abs', bodyweight:true, unit:'sec' },
+  ],
+  legs: [
+    { id:'goblet-squat', name:'Goblet Squat', kg:18, repMin:8, repMax:10, sets:3, muscle:'quads' },
+    { id:'romanian-deadlift', name:'Romanian Deadlift', kg:30, repMin:8, repMax:10, sets:3, muscle:'hamstrings' },
+    { id:'leg-press', name:'Leg Press', kg:60, repMin:10, repMax:12, sets:3, muscle:'quads' },
+  ],
+  glutes: [
+    { id:'hip-thrust', name:'Hip Thrust', kg:30, repMin:8, repMax:12, sets:3, muscle:'glutes' },
+    { id:'glute-bridge', name:'Glute Bridge', kg:20, repMin:10, repMax:15, sets:3, muscle:'glutes' },
+    { id:'bulgarian-split-squat', name:'Bulgarian Split Squat', kg:12, repMin:8, repMax:10, sets:3, muscle:'glutes' },
+  ],
+};
+
+const DEFAULT_WEEK = [
+  { id:'mon-strength', day:'Mon', type:'strength', title:'Upper Body', detail:'Chest + Back', group:'chest', completed:false },
+  { id:'tue-tempo', day:'Tue', type:'run', title:'Tempo Run', detail:'8–10 km controlled', completed:false },
+  { id:'wed-strength', day:'Wed', type:'strength', title:'Lower Body', detail:'Legs + Glutes', group:'legs', completed:false },
+  { id:'thu-intervals', day:'Thu', type:'run', title:'Intervals', detail:'Club session', completed:false },
+  { id:'fri-strength', day:'Fri', type:'strength', title:'Shoulders + Arms', detail:'Shoulders, biceps, triceps', group:'shoulders', completed:false },
+  { id:'sat-rest', day:'Sat', type:'rest', title:'Rest / Mobility', detail:'Optional easy mobility', completed:false },
+  { id:'sun-long', day:'Sun', type:'run', title:'Long Run', detail:'Easy aerobic', completed:false },
+];
+
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+
+const KEY = 'domsday-alpha-0.1';
+const $ = (s, root=document) => root.querySelector(s);
+const $$ = (s, root=document) => [...root.querySelectorAll(s)];
+
+function deepClone(x){ return JSON.parse(JSON.stringify(x)); }
+function todayShort(){ return DAYS[(new Date().getDay()+6)%7]; }
+function esc(s=''){ return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+
+const defaultState = {
+  page:'home',
+  week:1,
+  selectedGroup:'back',
+  selectedExercise:null,
+  bodyView:'front',
+  calendar:deepClone(DEFAULT_WEEK),
+  logs:{},
+  coach:[
+    {who:'coach', text:'Welcome to DOMSday Alpha 0.1. I can read your local training plan and logs, but this alpha coach uses simple on-device rules rather than a live AI service.'}
+  ],
+  goals:{ primary:'Build strength while supporting endurance training', weeklySessions:6 },
+};
+
+let state = load();
+function load(){
+  try{ return {...deepClone(defaultState), ...JSON.parse(localStorage.getItem(KEY)||'{}')}; }
+  catch{ return deepClone(defaultState); }
+}
+function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+function keyFor(group, exId, week=state.week){ return `${week}|${group}|${exId}`; }
+function getEx(group,id){ return EXERCISES[group]?.find(x=>x.id===id); }
+function getLog(group, ex, week=state.week){
+  const k=keyFor(group,ex.id,week);
+  if(!state.logs[k]) state.logs[k] = { sets:Array.from({length:ex.sets},()=>({kg:ex.bodyweight?'':ex.kg,reps:'',done:false})) };
+  return state.logs[k];
+}
+function previousLog(group, ex){
+  if(state.week<=1) return null;
+  return state.logs[keyFor(group,ex.id,state.week-1)] || null;
+}
+function completedSetCount(log){ return log?.sets?.filter(s=>s.done && String(s.reps).trim()!=='').length || 0; }
+function logComplete(ex,log){ return completedSetCount(log) >= ex.sets; }
+function stepFor(kg){ kg=Number(kg)||0; if(kg<10)return 1; if(kg<20)return 2; if(kg<50)return 2.5; return 5; }
+function recommendation(group,ex){
+  const prev=previousLog(group,ex);
+  if(!prev || !logComplete(ex,prev)) return {text:`Start: ${ex.bodyweight?'Bodyweight':ex.kg+' kg'} × ${ex.repMin}${ex.repMin===ex.repMax?'':'–'+ex.repMax}${ex.unit?' '+ex.unit:' reps'}`, kg:ex.bodyweight?'':ex.kg};
+  const reps=prev.sets.map(s=>Number(s.reps)||0);
+  const minRep=Math.min(...reps);
+  if(ex.bodyweight){
+    const target = Math.min(ex.repMax + (ex.unit==='sec'?5:1), Math.max(...reps) + (ex.unit==='sec'?5:1));
+    return {text:`Recommended: bodyweight × ${target}${ex.unit==='sec'?' sec':' reps'}`, kg:''};
+  }
+  const lastKg = Number(prev.sets.find(s=>s.kg!=='' && s.kg!=null)?.kg ?? ex.kg);
+  if(minRep >= ex.repMax){
+    const next=lastKg+stepFor(lastKg);
+    return {text:`Progress: ${next} kg × ${ex.repMin}–${ex.repMax}`,kg:next};
+  }
+  if(minRep < ex.repMin){
+    return {text:`Hold/recover: ${lastKg} kg and rebuild reps`,kg:lastKg};
+  }
+  return {text:`Hold: ${lastKg} kg × ${ex.repMin}–${ex.repMax}`,kg:lastKg};
+}
+
+function allWorkoutLogs(week=state.week){
+  const arr=[];
+  for(const [g,items] of Object.entries(EXERCISES)) for(const ex of items){
+    const l=state.logs[keyFor(g,ex.id,week)];
+    if(l) arr.push({g,ex,l});
+  }
+  return arr;
+}
+function strengthStats(){
+  const logs=allWorkoutLogs();
+  let doneSets=0,totalSets=0,volume=0,exDone=0;
+  logs.forEach(({ex,l})=>{
+    totalSets += ex.sets;
+    l.sets.forEach(s=>{ if(s.done){doneSets++; volume += (Number(s.kg)||0)*(Number(s.reps)||0); } });
+    if(logComplete(ex,l)) exDone++;
+  });
+  return {doneSets,totalSets,volume,exDone};
+}
+function calCompletion(){
+  const planned=state.calendar.filter(x=>x.type!=='rest').length;
+  const done=state.calendar.filter(x=>x.type!=='rest' && x.completed).length;
+  return {planned,done,pct: planned?Math.round(done/planned*100):0};
+}
+function render(){
+  save();
+  $('#app').innerHTML = `<div class="shell">
+    <header class="topbar"><div class="brand">DOMS<span class="day">day</span></div><div class="version">${APP_VERSION}</div></header>
+    <main class="content">${pageHtml()}</main>
+    ${navHtml()}
+  </div>`;
+  bind();
+}
+function navHtml(){
+  const items=[['home','⌂','Today'],['calendar','▦','Calendar'],['workout','⚡','Workout'],['coach','✦','Coach'],['progress','↗','Progress'],['review','✓','Review']];
+  return `<nav class="nav">${items.map(([id,ico,label])=>`<button data-nav="${id}" class="${state.page===id?'active':''}"><span class="ico">${ico}</span>${label}</button>`).join('')}</nav>`;
+}
+function pageHtml(){
+  if(state.page==='calendar') return calendarHtml();
+  if(state.page==='workout') return workoutHtml();
+  if(state.page==='coach') return coachHtml();
+  if(state.page==='progress') return progressHtml();
+  if(state.page==='review') return reviewHtml();
+  return homeHtml();
+}
+function homeHtml(){
+  const day=todayShort();
+  const today=state.calendar.find(x=>x.day===day) || state.calendar[0];
+  const c=calCompletion(); const s=strengthStats();
+  return `
+    <section class="hero">
+      <div class="eyebrow">Week ${state.week} of 12 · ${day}</div>
+      <h1>${esc(today.title)}</h1>
+      <p>${esc(today.detail)}. DOMSday keeps the plan simple: know what is due, log what happened, then adapt the next week.</p>
+      <button class="primary" data-start-today>${today.type==='strength'?'Start workout':'Open today'}</button>
+    </section>
+    <div class="section-title"><h2>This week</h2><span>${c.done}/${c.planned} planned sessions complete</span></div>
+    <div class="week-strip">${state.calendar.map(x=>`<div class="day-pill ${x.completed?'done':x.type!=='rest'?'planned':''}"><div class="d">${x.day}</div><div style="font-size:12px;font-weight:850;margin-top:4px">${x.type==='run'?'RUN':x.type==='strength'?'GYM':'REST'}</div><div class="dot"></div></div>`).join('')}</div>
+    <div class="section-title"><h2>Snapshot</h2><span>live from your logs</span></div>
+    <div class="grid three">
+      <div class="card"><div class="metric">${c.pct}%</div><div class="metric-sub">plan completion</div></div>
+      <div class="card"><div class="metric">${s.doneSets}</div><div class="metric-sub">strength sets logged</div></div>
+      <div class="card"><div class="metric">${Math.round(s.volume).toLocaleString()}</div><div class="metric-sub">kg-reps volume</div></div>
+    </div>
+    <div class="section-title"><h2>Goal</h2><span>Alpha profile</span></div>
+    <div class="card"><h3>${esc(state.goals.primary)}</h3><p class="muted small" style="margin-bottom:0">This profile is deliberately lightweight in Alpha 0.1. Goals become editable and more detailed in the next build.</p></div>`;
+}
+function calendarHtml(){
+  return `<div class="section-title" style="margin-top:4px"><h2>Training Calendar</h2><span>Week ${state.week}</span></div>
+  <div class="note">Alpha 0.1 supports moving a session one day left or right and marking it complete. Drag-and-drop comes once the core behaviour is proven.</div>
+  <div class="calendar" style="margin-top:12px">${state.calendar.map((x,i)=>`<div class="cal-row">
+    <div><div class="cal-day">${x.day}</div><div class="cal-type">${x.type}</div></div>
+    <div><div class="cal-title">${esc(x.title)}</div><div class="cal-detail">${esc(x.detail)}</div>${x.completed?'<div class="done-tag" style="margin-top:4px">Completed ✓</div>':''}</div>
+    <div class="cal-actions"><button class="mini" data-move="${i}|-1">←</button><button class="mini" data-toggle-session="${i}">${x.completed?'Undo':'Done'}</button><button class="mini" data-move="${i}|1">→</button></div>
+  </div>`).join('')}</div>`;
+}
+function bodySvg(selectedMuscle){
+  const hot=(...names)=>names.includes(selectedMuscle)?'hot':'';
+  return `<svg class="human" viewBox="0 0 220 520" aria-label="muscle map">
+    <circle class="skin" cx="110" cy="44" r="27"/>
+    <path class="skin" d="M82 78 Q110 68 138 78 L151 188 Q142 226 135 258 L128 308 L92 308 L85 258 Q78 226 69 188 Z"/>
+    <path class="skin" d="M80 88 Q60 104 50 136 L34 226 L48 232 L69 161 L86 129 Z"/>
+    <path class="skin" d="M140 88 Q160 104 170 136 L186 226 L172 232 L151 161 L134 129 Z"/>
+    <path class="skin" d="M91 304 L83 394 L77 493 L97 493 L110 350 L110 307 Z"/>
+    <path class="skin" d="M129 304 L137 394 L143 493 L123 493 L110 350 L110 307 Z"/>
+    <ellipse class="muscle ${hot('chest','upper-chest')}" cx="91" cy="136" rx="20" ry="25"/><ellipse class="muscle ${hot('chest','upper-chest')}" cx="129" cy="136" rx="20" ry="25"/>
+    <ellipse class="muscle ${hot('shoulders','side-delts','rear-delts')}" cx="74" cy="108" rx="15" ry="18"/><ellipse class="muscle ${hot('shoulders','side-delts','rear-delts')}" cx="146" cy="108" rx="15" ry="18"/>
+    <ellipse class="muscle ${hot('biceps')}" cx="59" cy="154" rx="10" ry="25"/><ellipse class="muscle ${hot('biceps')}" cx="161" cy="154" rx="10" ry="25"/>
+    <ellipse class="muscle ${hot('triceps')}" cx="55" cy="177" rx="9" ry="22"/><ellipse class="muscle ${hot('triceps')}" cx="165" cy="177" rx="9" ry="22"/>
+    <path class="muscle ${hot('abs')}" d="M96 162 h28 v86 h-28z"/><path class="muscle ${hot('obliques')}" d="M83 169 h13 v72 h-13z M124 169 h13 v72 h-13z"/>
+    <path class="muscle ${hot('lats','mid-back')}" d="M76 128 Q110 105 144 128 L137 205 Q110 225 83 205 Z"/>
+    <ellipse class="muscle ${hot('glutes')}" cx="96" cy="278" rx="20" ry="24"/><ellipse class="muscle ${hot('glutes')}" cx="124" cy="278" rx="20" ry="24"/>
+    <path class="muscle ${hot('quads')}" d="M89 310 l18 0 -9 92 -15 -4z M113 310 l18 0 6 88 -15 4z"/>
+    <path class="muscle ${hot('hamstrings')}" d="M86 312 l16 0 -7 83 -14 -3z M118 312 l16 0 5 80 -14 3z"/>
+  </svg>`;
+}
+function workoutHtml(){
+  const group=state.selectedGroup;
+  const items=EXERCISES[group]||[];
+  const selected=state.selectedExercise ? getEx(group,state.selectedExercise) : null;
+  return `<div class="section-title" style="margin-top:4px"><h2>Workout</h2><span>Week ${state.week} of 12</span></div>
+  <div class="tabs">${GROUPS.map(g=>`<button class="tab ${g.id===group?'active':''}" data-group="${g.id}">${g.label}</button>`).join('')}</div>
+  <div class="workout-layout">
+    <div class="card body-card"><h3>Muscle map</h3><p class="muted small">Select an exercise to highlight its main target.</p><div class="body-wrap">${bodySvg(selected?.muscle)}</div></div>
+    <div class="exercise-list">${items.map(ex=>exerciseHtml(group,ex)).join('')}</div>
+  </div>`;
+}
+function exerciseHtml(group,ex){
+  const log=getLog(group,ex); const rec=recommendation(group,ex); const sel=state.selectedExercise===ex.id;
+  const unit=ex.unit==='sec'?'sec':'reps';
+  return `<div class="exercise ${sel?'selected':''}" data-select-ex="${ex.id}">
+    <div class="exercise-head"><div><div class="exercise-name">${esc(ex.name)}</div><div class="target">Target: ${ex.sets} sets · ${ex.repMin}${ex.repMax!==ex.repMin?'–'+ex.repMax:''} ${unit}</div><div class="rec">${esc(rec.text)}</div></div><button class="ghost" data-select-ex="${ex.id}">◎</button></div>
+    ${log.sets.map((s,i)=>`<div class="set-grid">
+      <div class="set-no">${i+1}</div>
+      <input class="field" inputmode="decimal" placeholder="${ex.bodyweight?'BW':'kg'}" ${ex.bodyweight?'disabled':''} value="${ex.bodyweight?'':esc(s.kg)}" data-set-field="${group}|${ex.id}|${i}|kg" />
+      <input class="field" inputmode="numeric" placeholder="${unit}" value="${esc(s.reps)}" data-set-field="${group}|${ex.id}|${i}|reps" />
+      <button class="check ${s.done?'on':''}" data-set-done="${group}|${ex.id}|${i}">✓</button>
+    </div>`).join('')}
+  </div>`;
+}
+function coachResponse(q){
+  const t=q.toLowerCase(); const c=calCompletion(); const s=strengthStats();
+  if(t.includes('away') || t.includes('move') || t.includes('rearrange')) return `Your calendar is currently ${c.pct}% complete. In Alpha 0.1 I can suggest a move, but I will not silently change your plan. Try to keep hard lower-body strength away from your hardest run where possible, then use the Calendar arrows to move the session.`;
+  if(t.includes('sore') || t.includes('tired') || t.includes('fatigue')) return `If soreness is mild and movement is normal, keep the session easier and avoid forcing progression. If soreness is severe, worsening, or changes your movement, swap to recovery or another muscle group. Your current logged strength volume is ${Math.round(s.volume).toLocaleString()} kg-reps this week.`;
+  if(t.includes('progress') || t.includes('weight') || t.includes('increase')) return `The Alpha progression rule is simple: if you complete every planned set at or above the top of the rep range, next week increases load by a small step. If you land inside the range, hold. If you miss the minimum, hold or reduce effort and rebuild.`;
+  if(t.includes('run') || t.includes('triathlon')) return `The calendar already supports strength and endurance sessions. Alpha 0.1 does not yet generate a full triathlon plan; the next phase will add structured run, bike and swim targets and let the coach reason across them.`;
+  return `I can currently interpret your local calendar and workout logs. I would focus on today's planned session, record every set accurately, and let the weekly review use real data. Live AI coaching is intentionally not connected yet, so this response is rule-based.`;
+}
+function coachHtml(){
+  return `<div class="section-title" style="margin-top:4px"><h2>Coach</h2><span>local alpha logic</span></div>
+  <div class="note">This is a working prototype of the coaching experience, not yet a live AI PT. It reads your DOMSday data locally and uses safe, transparent rules. A real model/API connection comes later.</div>
+  <div class="card" style="margin-top:12px"><div class="chat">${state.coach.map(m=>`<div class="bubble ${m.who==='me'?'me':'coach'}">${esc(m.text)}</div>`).join('')}</div>
+    <div class="chat-input"><textarea id="coachText" placeholder="Ask about your week, progression, soreness or moving a session..."></textarea><button class="primary" data-send-coach>Send</button></div>
+  </div>`;
+}
+function progressHtml(){
+  const c=calCompletion(); const s=strengthStats();
+  const completedExercises=allWorkoutLogs().filter(({ex,l})=>logComplete(ex,l)).length;
+  return `<div class="section-title" style="margin-top:4px"><h2>Progress</h2><span>Week ${state.week}</span></div>
+  <div class="grid two">
+    <div class="card"><div class="metric">${c.pct}%</div><div class="metric-sub">plan adherence</div><div class="progress-bar" style="margin-top:12px"><i style="width:${c.pct}%"></i></div></div>
+    <div class="card"><div class="metric">${completedExercises}</div><div class="metric-sub">exercises fully logged</div></div>
+    <div class="card"><div class="metric">${s.doneSets}</div><div class="metric-sub">completed strength sets</div></div>
+    <div class="card"><div class="metric">${Math.round(s.volume).toLocaleString()}</div><div class="metric-sub">kg-reps training volume</div></div>
+  </div>
+  <div class="section-title"><h2>12-week progression</h2><span>switch week to test recommendations</span></div>
+  <div class="card"><div style="display:flex;gap:8px;align-items:center;justify-content:space-between"><button class="secondary" data-week="-1">← Previous</button><div style="font-weight:900">Week ${state.week} of 12</div><button class="secondary" data-week="1">Next →</button></div><p class="muted small" style="margin:14px 0 0">When you move to the next week, every strength exercise reads the previous week's completed sets and generates a recommendation.</p></div>`;
+}
+function reviewHtml(){
+  const c=calCompletion(); const s=strengthStats();
+  const strengthScore = s.totalSets ? Math.min(100,Math.round(s.doneSets/Math.max(1,s.totalSets)*100)) : 0;
+  const score=Math.round(c.pct*.7+strengthScore*.3);
+  let commentary='You have not logged enough data yet. Complete sessions and sets, then this review becomes meaningful.';
+  if(c.done>=3) commentary = c.pct>=80 ? 'Strong consistency. Keep the next week controlled: progress only the exercises where every set genuinely reached the top of the target range.' : 'There is useful work in the bank, but consistency is the biggest opportunity. Adjust the calendar before adding more volume.';
+  return `<div class="section-title" style="margin-top:4px"><h2>Weekly Review</h2><span>Week ${state.week}</span></div>
+    <section class="hero"><div class="eyebrow">DOMSday weekly</div><h1>${score}/100</h1><p>${esc(commentary)}</p></section>
+    <div class="card" style="margin-top:14px">
+      <div class="review-item"><div><b>Plan completion</b><div class="muted small">${c.done} of ${c.planned} planned sessions</div></div><div class="score ${c.pct>=80?'good':'warn'}">${c.pct}</div></div>
+      <div class="review-item"><div><b>Strength logging</b><div class="muted small">${s.doneSets} sets completed</div></div><div class="score ${strengthScore>=75?'good':'warn'}">${strengthScore}</div></div>
+      <div class="review-item"><div><b>Next-week progression</b><div class="muted small">Move to Week ${Math.min(12,state.week+1)} to see exercise-by-exercise recommendations based on completed sets.</div></div><button class="secondary" data-go-next-week>Open →</button></div>
+    </div>`;
+}
+function bind(){
+  $$('[data-nav]').forEach(b=>b.onclick=()=>{state.page=b.dataset.nav;render();});
+  const start=$('[data-start-today]'); if(start) start.onclick=()=>{ const t=state.calendar.find(x=>x.day===todayShort()); if(t?.type==='strength'&&t.group) state.selectedGroup=t.group; state.page=t?.type==='strength'?'workout':'calendar'; render(); };
+  $$('[data-group]').forEach(b=>b.onclick=()=>{state.selectedGroup=b.dataset.group;state.selectedExercise=null;render();});
+  $$('[data-select-ex]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); state.selectedExercise=b.dataset.selectEx; render(); });
+  $$('[data-set-field]').forEach(inp=>inp.onchange=()=>{
+    const [g,id,i,f]=inp.dataset.setField.split('|'); const ex=getEx(g,id); const l=getLog(g,ex); l.sets[Number(i)][f]=inp.value; save();
+  });
+  $$('[data-set-done]').forEach(b=>b.onclick=(e)=>{e.stopPropagation();const[g,id,i]=b.dataset.setDone.split('|');const ex=getEx(g,id);const l=getLog(g,ex);const s=l.sets[Number(i)]; if(String(s.reps).trim()===''){alert('Enter reps/time before completing this set.');return;} s.done=!s.done; render();});
+  $$('[data-move]').forEach(b=>b.onclick=()=>{const[iStr,dStr]=b.dataset.move.split('|');const i=Number(iStr),d=Number(dStr),j=i+d;if(j<0||j>=state.calendar.length)return;[state.calendar[i],state.calendar[j]]=[state.calendar[j],state.calendar[i]];state.calendar.forEach((x,k)=>x.day=DAYS[k]);render();});
+  $$('[data-toggle-session]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.toggleSession);state.calendar[i].completed=!state.calendar[i].completed;render();});
+  $$('[data-week]').forEach(b=>b.onclick=()=>{state.week=Math.max(1,Math.min(12,state.week+Number(b.dataset.week)));render();});
+  const send=$('[data-send-coach]'); if(send) send.onclick=()=>{const ta=$('#coachText');const q=ta.value.trim();if(!q)return;state.coach.push({who:'me',text:q},{who:'coach',text:coachResponse(q)});render();setTimeout(()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}),20);};
+  const next=$('[data-go-next-week]'); if(next) next.onclick=()=>{state.week=Math.min(12,state.week+1);state.page='workout';render();};
+}
+
+render();
+
+</script>
+</body>
+</html>
